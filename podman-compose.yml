@@ -1,0 +1,20 @@
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: ",fhf,firf"
+      MARIADB_DATABASE: test
+      MARIADB_USER: user
+      MARIADB_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - backend-net
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+
+volumes:
+  db_data:
