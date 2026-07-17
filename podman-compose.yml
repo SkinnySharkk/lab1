@@ -20,6 +20,17 @@ services:
       - ./web-site/:/var/www/html:ro,Z 
     depends_on:
       db
+  proxy:
+    image: docker.io/library/haproxy:3.4-alpine
+    networks:
+      - frontend-net
+    ports:
+      - "8080:8080"
+      - "8404:8404"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,Z
+    depends_on:
+      web
 networks:
   frontend-net:
     driver: bridge
