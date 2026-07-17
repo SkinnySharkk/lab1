@@ -1,6 +1,6 @@
 services:
   db:
-    image: mariadb:10.11
+    image: docker.io/library/mariadb:10.11
     environment:
       MARIADB_ROOT_PASSWORD: ",fhf,firf"
       MARIADB_DATABASE: test
@@ -10,6 +10,16 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - backend-net
+  web:
+    image: docker.io/library/nginx:1.26-alpine
+    networks:
+      - backend-net
+      - frontend-net
+    volumes:
+      - ./nginx/:/etc/nginx/conf.d:ro,Z
+      - ./web-site/:/var/www/html:ro,Z 
+    depends_on:
+      db
 networks:
   frontend-net:
     driver: bridge
