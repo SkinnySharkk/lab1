@@ -1,0 +1,41 @@
+services:
+  db:
+    image: docker.io/library/mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: ",fhf,firf"
+      MARIADB_DATABASE: test
+      MARIADB_USER: user
+      MARIADB_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - backend-net
+  web:
+    image: docker.io/library/nginx:1.26-alpine
+    networks:
+      - backend-net
+      - frontend-net
+    volumes:
+      - ./nginx/:/etc/nginx/conf.d:ro,Z
+      - ./web-site/:/var/www/html:ro,Z 
+    depends_on:
+      db
+  proxy:
+    image: docker.io/library/haproxy:3.4-alpine
+    networks:
+      - frontend-net
+    ports:
+      - "8080:8080"
+      - "8404:8404"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,Z
+    depends_on:
+      web
+networks:
+  frontend-net:
+    driver: bridge
+  backend-net:
+    driver: bridge
+
+volumes:
+  db_data:
