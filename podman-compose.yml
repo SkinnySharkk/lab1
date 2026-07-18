@@ -20,6 +20,26 @@ services:
       - ./web-site/:/var/www/html:ro,Z 
     depends_on:
       db
+  web2:
+    image: docker.io/library/nginx:1.26-alpine
+    networks:
+      - backend-net
+      - frontend-net
+    volumes:
+      - ./nginx/:/etc/nginx/conf.d:ro,Z
+      - ./web-site/:/var/www/html:ro,Z 
+    depends_on:
+      db
+  web3:
+    image: docker.io/library/nginx:1.26-alpine
+    networks:
+      - backend-net
+      - frontend-net
+    volumes:
+      - ./nginx/:/etc/nginx/conf.d:ro,Z
+      - ./web-site/:/var/www/html:ro,Z 
+    depends_on:
+      db
   proxy:
     image: docker.io/library/haproxy:3.4-alpine
     networks:
@@ -27,10 +47,18 @@ services:
     ports:
       - "8080:8080"
       - "8404:8404"
+      - "8443:8443"
     volumes:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,Z
+      - ./haproxy/certs:/usr/local/etc/haproxy/certs:ro,Z
     depends_on:
       web
+  php-fpm:
+    image: docker.io/library/php:8.3-fpm-alpine
+    networks:
+      - backend-net
+    volumes:
+      - ./web-site/index.php:/var/log/html:ro,Z
 networks:
   frontend-net:
     driver: bridge
