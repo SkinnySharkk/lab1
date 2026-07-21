@@ -12,7 +12,12 @@ try {
     $db_status = '❌ Ошибка БД: ' . $e->getMessage();
 }
 
-$server_name = gethostname(); // имя контейнера (web1 или web2)
+#$server_name = gethostname(); // имя контейнера (web1 или web2)
+if (!empty($_SERVER['HTTP_X_SERVER_NAME'])) {
+    $server_name = $_SERVER['HTTP_X_SERVER_NAME'] . ' (через php-fpm: ' . gethostname() . ')';
+} else {
+    $server_name = gethostname();
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -20,6 +25,6 @@ $server_name = gethostname(); // имя контейнера (web1 или web2)
 <body>
     <h1>Привет! Запрос обработан на сервере: <strong><?= $server_name ?></strong></h1>
     <p><?= $db_status ?></p>
-    <p><small>Балансировка round-robin между web1 и web2</small></p>
+    <p><small>Балансировка round-robin между web и web2 и web3</small></p>
 </body>
 </html>

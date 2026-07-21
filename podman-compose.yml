@@ -10,6 +10,7 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - backend-net
+
   web:
     image: docker.io/library/nginx:1.26-alpine
     networks:
@@ -17,9 +18,10 @@ services:
       - frontend-net
     volumes:
       - ./nginx/:/etc/nginx/conf.d:ro,Z
-      - ./web-site/:/var/www/html:ro,Z 
+      - ./web-site/:/var/www/html:ro,z 
     depends_on:
-      db
+      - db
+
   web2:
     image: docker.io/library/nginx:1.26-alpine
     networks:
@@ -27,9 +29,10 @@ services:
       - frontend-net
     volumes:
       - ./nginx/:/etc/nginx/conf.d:ro,Z
-      - ./web-site/:/var/www/html:ro,Z 
+      - ./web-site/:/var/www/html:ro,z 
     depends_on:
-      db
+      - db
+
   web3:
     image: docker.io/library/nginx:1.26-alpine
     networks:
@@ -37,9 +40,10 @@ services:
       - frontend-net
     volumes:
       - ./nginx/:/etc/nginx/conf.d:ro,Z
-      - ./web-site/:/var/www/html:ro,Z 
+      - ./web-site/:/var/www/html:ro,z 
     depends_on:
-      db
+      - db
+
   proxy:
     image: docker.io/library/haproxy:3.4-alpine
     networks:
@@ -52,13 +56,23 @@ services:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,Z
       - ./haproxy/certs:/usr/local/etc/haproxy/certs:ro,Z
     depends_on:
-      web
+      - web
+
   php-fpm:
-    image: docker.io/library/php:8.3-fpm-alpine
+    image: localhost/my-custom-php:8.3-fpm
+    build:
+      context: ./php-fpm
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: db
+      MYSQL_DATABASE: test
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     networks:
       - backend-net
     volumes:
-      - ./web-site/index.php:/var/log/html:ro,Z
+      - ./web-site/:/var/www/html:ro,Z
+
 networks:
   frontend-net:
     driver: bridge
