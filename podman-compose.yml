@@ -83,8 +83,8 @@ services:
     networks:
       - frontend-net
     volumes:
-      - ./haproxy/haproxy.cfg:/usr/local/ets/haproxy/haproxy.cfg:ro,Z
-      - ./haproxy/certs/:/usr/local/etc/haproxy/certs/:ro,Z
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro,Z
+      - ./haproxy/certs:/usr/local/etc/haproxy/certs:ro,Z
     depends_on:
       - web1
       - web2
