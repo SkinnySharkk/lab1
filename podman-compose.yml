@@ -12,6 +12,7 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+
   redis:
     image: docker.io/library/redis:7-alpine
     networks:
@@ -22,6 +23,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
   php-fpm:
     image: localhost/my-custom-php:8.3-fpm
     build:
@@ -43,6 +45,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+
   web1:
     image: docker.io/library/nginx:1.26-alpine
     networks:
@@ -60,6 +63,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
   web2:
     image: docker.io/library/nginx:1.26-alpine
     networks:
@@ -77,6 +81,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
   proxy:
     image: docker.io/library/haproxy:3.4-alpine
     ports:
@@ -93,17 +98,107 @@ services:
         condition: service_healthy
       web2:
         condition: service_healthy
-          
     healthcheck:
       test: ["CMD", "haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg", "-c"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+
+  prometheus:
+    image: docker.io/prom/prometheus:v3.13.1
+    ports:
+      - "9090:9090"
+    networks:
+      - backend-net
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro,Z
+      - prometheus_data:/prometheus
+
+  grafana:
+    image: docker.io/grafana/grafana:13.1.0
+    ports:
+      - "3000:3000"
+    networks:
+      - backend-net
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro,Z
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro,Z
+      - grafana_data:/var/lib/grafana   
+    env_file: .env   
+
+  node-exporter:
+    image: docker.io/prom/node-exporter:v1.12.1
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - backend-net
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+
+  haproxy-exporter:
+    image: docker.io/prom/haproxy-exporter:latest
+    container_name: haproxy-exporter
+    ports:
+      - "9101:9101"
+    env_file: .env
+    networks:
+      - backend-net
+    restart: unless-stopped
+
+  nginx-exporter:
+    image: docker.io/nginx/nginx-prometheus-exporter:latest
+    container_name: nginx-exporter
+    ports:
+      - "9113:9113"
+    env_file: .env
+    networks:
+      - backend-net
+    restart: unless-stopped
+
+  mysqld-exporter:
+    image: docker.io/prom/mysqld-exporter:v0.19.0
+    container_name: mysqld-exporter
+    ports:
+      - "9104:9104"
+    env_file: .env
+    networks:
+      - backend-net
+    restart: unless-stopped
+
+  redis-exporter:
+    image: docker.io/oliver006/redis_exporter:v1.82.0
+    container_name: redis-exporter
+    ports:
+      - "9121:9121"
+    env_file: .env
+    networks:
+      - backend-net
+    restart: unless-stopped
+
+  php-fpm-exporter:
+    image: docker.io/hipages/php-fpm_exporter:latest
+    container_name: php-fpm-exporter
+    ports:
+      - "9253:9253"
+    env_file: .env
+    networks:
+      - backend-net
+    restart: unless-stopped
+
 networks:
   frontend-net:
     driver: bridge
   backend-net:
     driver: bridge
+
 volumes:
   db_data:
+  prometheus_data:
+  grafana_data:
