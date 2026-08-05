@@ -145,6 +145,8 @@ services:
   nginx-exporter:
     image: docker.io/nginx/nginx-prometheus-exporter:latest
     container_name: nginx-exporter
+    environment:
+      - SCRAPE_URI=http://web1:80/nginx_status
     ports:
       - "9113:9113"
     env_file: .env
