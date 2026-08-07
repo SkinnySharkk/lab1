@@ -5,7 +5,8 @@ services:
     networks:
       - backend-net
     volumes:
-      db_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
+      - ./mariadb/init.sql:/docker-entrypoint-initdb.d/init-exporter.sql:ro,Z
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
