@@ -154,9 +154,12 @@ services:
       - backend-net
     restart: unless-stopped
 
-  mysqld-exporter:
+  mysql-exporter:
     image: docker.io/prom/mysqld-exporter:v0.19.0
     container_name: mysqld-exporter
+    command: "--config.my-cnf=/etc/mysql/.my.cnf"
+    volumes:
+      - ./mysql-exporter/.my.cnf:/etc/mysql/.my.cnf:ro,Z
     ports:
       - "9104:9104"
     env_file: .env
