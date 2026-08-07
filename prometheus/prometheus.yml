@@ -18,3 +18,6 @@ scrape_configs:
   - job_name: 'load-mariadb-metrics'
     static_configs:
       - targets: ['mysql-exporter:9104']
+  - job_name: 'load-node-metrics'
+    static_configs:
+      - targets: ['node-exporter:9100']
